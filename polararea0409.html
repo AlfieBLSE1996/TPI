@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polar Area Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background-color: black;">
+    <canvas id="polarAreaChart" width="400" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById('polarAreaChart').getContext('2d');
+
+        var polarAreaChart = new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: [
+                    '1.5 Degrees', 
+                    'Below 2 Degrees', 
+                    'National Pledges', 
+                    'No or unsuitable disclosure', 
+                    'Not Aligned'
+                ],
+                datasets: [{
+                    label: 'Carbon Performance Alignment 2050',
+                    data: [
+                        118, // 1.5 Degrees
+                        54,  // Below 2 Degrees
+                        32,  // National Pledges
+                        85,  // No or unsuitable disclosure
+                        105  // Not Aligned
+                    ],
+                    backgroundColor: [
+                        'rgba(0, 204, 102, 0.5)',   // Green for 1.5 Degrees
+                        'rgba(255, 204, 0, 0.5)',   // Yellow for Below 2 Degrees
+                        'rgba(255, 153, 51, 0.5)',  // Orange for National Pledges
+                        'rgba(128, 128, 128, 0.5)', // Gray for No or unsuitable disclosure
+                        'rgba(204, 0, 0, 0.5)',     // Red for Not Aligned
+                    ],
+                    hoverOffset: 15  // This will make the slice "pop out" when hovered over
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false // Remove legend
+                    },
+                    tooltip: {
+                        position: 'nearest', // Ensures tooltips appear closest to the cursor
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                var label = tooltipItem.label || '';
+                                var value = tooltipItem.raw;
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += value + ' companies';
+                                return label;
+                            }
+                        },
+                        // Custom positioning to offset tooltips outside the chart area
+                        external: function(context) {
+                            // Tooltip Element
+                            var tooltipEl = document.getElementById('chartjs-tooltip');
+                            if (!tooltipEl) {
+                                tooltipEl = document.createElement('div');
+                                tooltipEl.id = 'chartjs-tooltip';
+                                tooltipEl.style.opacity = 1;
+                                tooltipEl.style.position = 'absolute';
+                                tooltipEl.style.background = 'rgba(0, 0, 0, 0.7)';
+                                tooltipEl.style.color = 'white';
+                                tooltipEl.style.padding = '10px';
+                                tooltipEl.style.pointerEvents = 'none';
+                                tooltipEl.style.transform = 'translateY(20px)'; // Offset below the chart
+                                tooltipEl.style.borderRadius = '5px';
+                                document.body.appendChild(tooltipEl);
+                            }
+
+                            var tooltipModel = context.tooltip;
+
+                            if (tooltipModel.opacity === 0) {
+                                tooltipEl.style.opacity = 0;
+                                return;
+                            }
+
+                            // Set text for tooltip
+                            if (tooltipModel.body) {
+                                var title = tooltipModel.title || [];
+                                var body = tooltipModel.body.map(item => item.lines).join('<br>');
+
+                                tooltipEl.innerHTML = '<strong>' + title + '</strong><br>' + body;
+                            }
+
+                            // Get the position of the canvas
+                            var position = context.chart.canvas.getBoundingClientRect();
+
+                            // Set position for the tooltip below the chart
+                            tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+                            tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 20 + 'px'; // Offset downwards
+                            tooltipEl.style.opacity = 1;
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        ticks: {
+                            display: false, // Remove radial tick numbers
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.2)' // Subtle white grid lines
+                        },
+                        angleLines: {
+                            color: 'rgba(255, 255, 255, 0.3)' // Subtle white angle lines
+                        }
+                    }
+                },
+                layout: {
+                    padding: 10 // Add some padding around the chart
+                },
+                backgroundColor: 'rgba(0, 0, 0, 1)' // Ensure chart background is black
+            }
+        });
+    </script>
+
+    <!-- Custom CSS for Tooltip -->
+    <style>
+        #chartjs-tooltip {
+            opacity: 0;
+            transition: all .1s ease;
+        }
+    </style>
+</body>
+</html>
+
